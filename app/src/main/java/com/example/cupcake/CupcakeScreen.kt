@@ -15,6 +15,9 @@
  */
 package com.example.cupcake
 
+import android.content.Context
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -29,22 +32,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.cupcake.ui.OrderViewModel
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.res.dimensionResource
-import com.example.cupcake.ui.StartOrderScreen
 import com.example.cupcake.data.DataSource
-import androidx.compose.ui.platform.LocalContext
-import com.example.cupcake.ui.SelectOptionScreen
-import androidx.compose.foundation.layout.fillMaxHeight
-import com.example.cupcake.data.DataSource.flavors
 import com.example.cupcake.ui.OrderSummaryScreen
+import com.example.cupcake.ui.OrderViewModel
+import com.example.cupcake.ui.SelectOptionScreen
+import com.example.cupcake.ui.StartOrderScreen
+import android.content.Intent
 
 
 /**
@@ -141,19 +142,34 @@ fun CupcakeApp(
                 )
             }
             composable(route = CupcakeScreen.Summary.name) {
+                val context = LocalContext.current
                 OrderSummaryScreen(
                     orderUiState = uiState,
                     onCancelButtonClicked = {
                         cancelOrderAndNavigateToStart(viewModel, navController)
                     },
                     onSendButtonClicked = { subject: String, summary: String ->
-
+                        shareOrder(context, subject = subject, summary = summary)
                     },
                     modifier = Modifier.fillMaxHeight()
                 )
             }
         }
     }
+}
+
+private fun shareOrder(context: Context, subject: String, summary: String) {
+    val intent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_SUBJECT, subject)
+        putExtra(Intent.EXTRA_TEXT, summary)
+    }
+    context.startActivity(
+        Intent.createChooser(
+            intent,
+            context.getString(R.string.new_cupcake_order)
+        )
+    )
 }
 
 private fun cancelOrderAndNavigateToStart(
