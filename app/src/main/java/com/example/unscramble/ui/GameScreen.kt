@@ -79,10 +79,11 @@ fun GameScreen(gameViewModel: GameViewModel = viewModel()) {
         )
         GameLayout(
             currentScrambledWord = gameUiState.currentScrambledWord,
-            userGuess = gameViewModel.userGuess,
             onUserGuessChanged = { gameViewModel.updateUserGuess(it) },
             onKeyboardDone = { gameViewModel.checkUserGuess() },
             isGuessWrong = gameUiState.isGuessedWordWrong,
+            userGuess = gameViewModel.userGuess,
+            wordCount = gameUiState.currentWordCount,
             )
         Column(
             modifier = Modifier
@@ -104,7 +105,7 @@ fun GameScreen(gameViewModel: GameViewModel = viewModel()) {
                 )
             }
             OutlinedButton(
-                onClick = { },
+                onClick = { gameViewModel.skipWord() },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
@@ -114,7 +115,7 @@ fun GameScreen(gameViewModel: GameViewModel = viewModel()) {
             }
         }
 
-        GameStatus(score = 0, modifier = Modifier.padding(20.dp))
+        GameStatus(score = gameUiState.score, modifier = Modifier.padding(20.dp))
     }
 }
 
@@ -133,12 +134,13 @@ fun GameStatus(score: Int, modifier: Modifier = Modifier) {
 
 @Composable
 fun GameLayout(
+    wordCount: Int,
     currentScrambledWord: String,
     isGuessWrong: Boolean,
     userGuess: String,
     onUserGuessChanged: (String) -> Unit,
     onKeyboardDone: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val mediumPadding = dimensionResource(R.dimen.padding_medium)
 
@@ -150,9 +152,14 @@ fun GameLayout(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             Text(
+                text = stringResource(R.string.word_count, wordCount),
+                style = typography.titleMedium,
+                color = colorScheme.onPrimary
+            )
+            Text(
                 text = currentScrambledWord,
                 fontSize = 45.sp,
-                modifier = modifier.align(Alignment.CenterHorizontally)
+                modifier = modifier.align(Alignment.CenterHorizontally),
             )
             Text(
                 text = stringResource(R.string.instructions),
